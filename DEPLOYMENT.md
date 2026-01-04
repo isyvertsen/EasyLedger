@@ -198,10 +198,13 @@ Coolify er perfekt for self-hosted deployment på egen server.
 
 ### 3. **Konfigurer Build Settings**
    - **Build Pack:** Nixpacks (auto-detektert for Next.js)
+   - **Node.js Version:** 24.x (konfigurert i `.nixpacks.toml`)
    - **Port:** 3000 (Next.js default)
    - **Install Command:** `npm install`
    - **Build Command:** `npm run build`
    - **Start Command:** `npm start` (dette vil kjøre `scripts/start.sh`)
+
+   **Viktig:** Prosjektet bruker Prisma 7 som krever Node.js 24.0+. Dette er automatisk konfigurert i `.nixpacks.toml`.
 
 ### 4. **Sett Environment Variables**
    I Application → Environment Variables tab:
