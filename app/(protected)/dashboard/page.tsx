@@ -1,5 +1,5 @@
 import { getDashboardStats } from "~/lib/actions/dashboard";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
 import { FileText, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -8,9 +8,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Oversikt over din virksomhet
+          Velkommen tilbake! Her er en oversikt over din virksomhet.
         </p>
       </div>
 
