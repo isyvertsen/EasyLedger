@@ -9,6 +9,6 @@ npx prisma migrate deploy
 
 echo "✅ Migrations complete!"
 
-# Start Next.js production server
+# Start Next.js production server using standalone mode
 echo "🌐 Starting Next.js server..."
-exec npm run start:next
+exec node .next/standalone/server.js
