@@ -1,8 +1,8 @@
 # Prosjektstatus - Faktura- og Regnskapssystem
 
-**Sist oppdatert:** 2026-01-04
-**Branch:** fix/docker-build-typescript-errors
-**Commit:** de67771
+**Sist oppdatert:** 2026-01-04 (Evening - CSS Fix)
+**Branch:** fix/css-static-assets-directory-structure
+**Commit:** 6c5d541
 
 ## Gjennomførte Faser
 
@@ -143,12 +143,51 @@
   - DEPLOYMENT.md comprehensive guide
   - Verified production build succeeds
 
+### ✅ BONUS: Production Deployment Issues - LØST! (NYE)
+**Coolify deployment feilsøking og fikser**
+
+- ✅ **PR #4: Docker Build + TypeScript Fixes**
+  - Fixed all TypeScript strict mode compilation errors
+  - Created multi-stage Dockerfile with Node 24.x
+  - Added @types/pg dependency
+  - Fixed Zod schema validation issues
+
+- ✅ **PR #5: Production Standalone + Migrations**
+  - Changed from `next start` to standalone mode
+  - Added scripts/start.sh with automatic migrations
+  - Fixed "next start does not work with output: standalone" error
+  - Fixed "Failed to find Server Action" errors
+
+- ✅ **PR #6: Docker Networking Fix**
+  - Added `HOSTNAME="0.0.0.0"` for Docker container networking
+  - Fixed Bad Gateway 502 error in Coolify
+  - Server now binds to all network interfaces
+
+- ✅ **PR #7: Migrations Committed to Git (CRITICAL)**
+  - Removed `/prisma/migrations` from .gitignore
+  - Committed 238-line migration.sql file
+  - Fixed "No migration found in prisma/migrations" error
+  - Fixed "The table `public.User` does not exist" error
+  - **ROOT CAUSE:** Coolify builds from git, migrations must be committed
+
+- ✅ **PR #8 & #9: CSS/Static Assets Fix (CRITICAL)**
+  - Fixed all `_next/static/*` files returning 404
+  - **ROOT CAUSE:** Static assets copied to wrong nested location
+  - **FIX:** Copy assets to same directory level as server.js
+  - Dockerfile: Changed from `./.next/standalone/public` to `./public`
+  - start.sh: Removed unnecessary `cd .next/standalone`
+  - Application now fully styled in production!
+
 ## Pågående Arbeid
 
-### 🚀 Coolify Deployment
-- Docker image bygget og testet lokalt
-- Klar for push til GitHub og Coolify deployment
-- Alle build errors løst (TypeScript, Docker, Prisma)
+### ✅ Coolify Deployment - VELLYKKET!
+- ✅ Docker image bygget og testet lokalt
+- ✅ Pushed til GitHub og deployed til Coolify
+- ✅ Alle build errors løst (TypeScript, Docker, Prisma)
+- ✅ Database migrations kjører automatisk
+- ✅ CSS og static assets laster korrekt
+- ✅ Application kjører på: https://raviledger.norskmatlevering.no
+- ✅ **PRODUCTION READY!**
 
 ## Gjenstående Faser
 
@@ -295,6 +334,22 @@
 ✅ Missing @types/pg → Installed dev dependency
 ✅ react-pdf type errors → Fixed med type assertion
 ✅ Prisma config generator → Removed unsupported property
+✅ "No migration found" error → PR #7: Committed migrations to git
+✅ "table User does not exist" → PR #7: Database schema now deploys correctly
+✅ Bad Gateway 502 → PR #6: Fixed with HOSTNAME="0.0.0.0"
+✅ CSS not loading (404 on static assets) → PR #8-9: Fixed standalone directory structure
+
+### Production Deployment Issues - ALL RESOLVED!
+**9 PRs merged to solve production deployment:**
+1. PR #3: Next.js 15 params Promise fix
+2. PR #4: Docker build + TypeScript strict mode
+3. PR #5: Production standalone + migrations
+4. PR #6: HOSTNAME=0.0.0.0 networking
+5. PR #7: Commit migrations to git (CRITICAL)
+6. PR #8: CSS standalone directory fix (first attempt)
+7. PR #9: CSS standalone directory fix (FINAL - correct structure)
+
+**Current Status:** Application fully deployed and functional on Coolify!
 
 ### Ingen åpne issues
 
@@ -320,13 +375,25 @@
 
 ## Konklusjon
 
-Prosjektet er nå **deployment-klart** med alle kritiske CRUD-moduler implementert, en kraftig AI-drevet faktura-upload funksjon, og fullstendig Docker production build. Systemet kan deployes til Coolify/produksjon umiddelbart.
+Prosjektet er nå **LIVE I PRODUKSJON** på Coolify med alle kritiske CRUD-moduler implementert, en kraftig AI-drevet faktura-upload funksjon, og fullstendig Docker production build.
 
-Gjenstående arbeid er primært dashboard for datainnsikt og polering av brukeropplevelsen. Alle tekniske blokkere for produksjon er løst:
-- ✅ Docker build verified
+**Production URL:** https://raviledger.norskmatlevering.no
+
+Alle tekniske blokkere for produksjon er løst gjennom 9 PRs:
+- ✅ Docker build verified and deployed
 - ✅ TypeScript strict mode compliant
 - ✅ Prisma 7 + Node 24.x compatible
 - ✅ Next.js 15 production ready
-- ✅ Automatic migrations configured
+- ✅ Automatic migrations configured and running
+- ✅ Static assets serving correctly
+- ✅ Networking configured for Docker/Coolify
+- ✅ Database schema deployed
 
-**Neste milestone:** Coolify deployment → Dashboard implementering → Production launch
+**Gjenstående arbeid er kun features:**
+- Dashboard for datainnsikt (FASE 12)
+- Polering av brukeropplevelsen (FASE 14)
+- Invoice PDF generering (mangler fortsatt)
+
+**Neste milestone:** Dashboard implementering → Invoice PDF → Feature completion
+
+**Deployment suksess!** Systemet er nå tilgjengelig for bruk i produksjon. 🚀
