@@ -45,9 +45,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files from builder
-COPY --from=builder /app/public ./public
+# Standalone mode requires specific file structure
 COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/scripts ./scripts
@@ -55,6 +54,11 @@ COPY --from=builder /app/scripts ./scripts
 # Copy ALL node_modules for Prisma and dependencies
 # This includes Prisma Client, pg adapter, dotenv, etc.
 COPY --from=builder /app/node_modules ./node_modules
+
+# CRITICAL: Copy static assets to standalone's expected location
+# These must be inside .next/standalone for server.js to find them
+COPY --from=builder /app/public ./.next/standalone/public
+COPY --from=builder /app/.next/static ./.next/standalone/.next/static
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
