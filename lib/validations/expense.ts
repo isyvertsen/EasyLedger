@@ -7,5 +7,5 @@ export const expenseSchema = z.object({
   amount: z.number().positive("Beløp må være større enn 0"),
   vatAmount: z.number().min(0).optional(),
   date: z.date(),
-  status: z.enum(["REGISTERED", "PAID"]).default("REGISTERED"),
+  status: z.enum(["REGISTERED", "PAID"]),
 });

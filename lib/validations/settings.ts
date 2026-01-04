@@ -8,9 +8,9 @@ export const settingsSchema = z.object({
   city: z.string().optional(),
   logo: z.string().optional(),
   bankAccount: z.string().optional(),
-  vatRate: z.number().min(0).max(100).default(25),
-  invoicePrefix: z.string().min(1, "Fakturaprefix er påkrevd").default("FAK"),
-  invoiceNextNumber: z.number().int().positive().default(1000),
+  vatRate: z.number().min(0).max(100),
+  invoicePrefix: z.string().min(1, "Fakturaprefix er påkrevd"),
+  invoiceNextNumber: z.number().int().positive(),
   emailFrom: z.string().email("Ugyldig e-postadresse").optional().or(z.literal("")),
-  paymentDueDays: z.number().int().positive().default(14),
+  paymentDueDays: z.number().int().positive(),
 });
