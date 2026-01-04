@@ -55,10 +55,10 @@ COPY --from=builder /app/scripts ./scripts
 # This includes Prisma Client, pg adapter, dotenv, etc.
 COPY --from=builder /app/node_modules ./node_modules
 
-# CRITICAL: Copy static assets to standalone's expected location
-# These must be inside .next/standalone for server.js to find them
-COPY --from=builder /app/public ./.next/standalone/public
-COPY --from=builder /app/.next/static ./.next/standalone/.next/static
+# CRITICAL: Copy static assets to same level as server.js
+# Next.js standalone mode expects these at the same directory level
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/static ./.next/static
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
