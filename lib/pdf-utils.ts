@@ -1,4 +1,4 @@
-import { pdf } from "@react-pdf/renderer";
+import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePDF } from "~/components/pdf/invoice-pdf";
 import { Invoice, InvoiceLine, Customer, Settings } from "@prisma/client";
 import { createElement } from "react";
@@ -13,10 +13,8 @@ export async function generateInvoicePDFBuffer(
   settings: Settings
 ): Promise<Buffer> {
   // Create the PDF element using createElement instead of JSX
-  const pdfDoc = createElement(InvoicePDF, { invoice, settings });
-  const asPdf = pdf(pdfDoc);
-  const blob = await asPdf.toBlob();
-  const buffer = Buffer.from(await blob.arrayBuffer());
+  const pdfDoc = createElement(InvoicePDF, { invoice, settings }) as any;
+  const buffer = await renderToBuffer(pdfDoc);
 
   return buffer;
 }

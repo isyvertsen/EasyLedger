@@ -80,7 +80,7 @@ export default async function EditExpensePage({
                 >
                   <span className="text-sm">{attachment.filename}</span>
                   <span className="text-xs text-muted-foreground">
-                    {(attachment.size / 1024).toFixed(2)} KB
+                    {attachment.size ? (attachment.size / 1024).toFixed(2) : '0.00'} KB
                   </span>
                 </div>
               ))}

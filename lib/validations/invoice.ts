@@ -4,7 +4,7 @@ export const invoiceLineSchema = z.object({
   description: z.string().min(1, "Beskrivelse er påkrevd"),
   quantity: z.number().positive("Antall må være større enn 0"),
   unitPrice: z.number().min(0, "Enhetspris kan ikke være negativ"),
-  vatRate: z.number().min(0).max(100).default(25),
+  vatRate: z.number().min(0).max(100),
 });
 
 export const invoiceSchema = z.object({
