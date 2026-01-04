@@ -12,9 +12,10 @@ import { notFound } from "next/navigation";
 export default async function EditCategoryPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const category = await getCategory(params.id);
+  const { id } = await params;
+  const category = await getCategory(id);
 
   if (!category) {
     notFound();
