@@ -10,5 +10,10 @@ npx prisma migrate deploy
 echo "✅ Migrations complete!"
 
 # Start Next.js production server using standalone mode
-echo "🌐 Starting Next.js server..."
+echo "🌐 Starting Next.js server on 0.0.0.0:3000..."
+
+# Ensure server listens on all interfaces for Docker/Coolify
+export PORT=3000
+export HOSTNAME="0.0.0.0"
+
 exec node .next/standalone/server.js
