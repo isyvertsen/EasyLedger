@@ -1,0 +1,17 @@
+{
+  "watch": [
+    "app",
+    "components",
+    "lib",
+    "prisma/schema.prisma",
+    ".env.local"
+  ],
+  "ext": "ts,tsx,js,jsx,json,prisma",
+  "ignore": [
+    "node_modules",
+    ".next",
+    "dist",
+    ".git"
+  ],
+  "exec": "next dev -p 4001"
+}

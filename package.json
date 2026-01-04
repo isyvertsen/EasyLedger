@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 4001",
+    "dev": "nodemon",
+    "dev:next": "next dev -p 4001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -49,6 +50,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^8",
     "eslint-config-next": "^15.1.1",
+    "nodemon": "^3.1.11",
     "postcss": "^8",
     "prisma": "^7.2.0",
     "svix": "^1.84.1",
