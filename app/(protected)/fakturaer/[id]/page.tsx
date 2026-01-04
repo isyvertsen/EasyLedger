@@ -1,6 +1,7 @@
 import { getInvoice } from "~/lib/actions/invoices";
 import { getCustomers } from "~/lib/actions/customers";
 import { InvoiceForm } from "~/components/forms/invoice-form";
+import { InvoiceActions } from "~/components/invoices/invoice-actions";
 import {
   Card,
   CardContent,
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import {
   Table,
@@ -19,8 +19,6 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { notFound } from "next/navigation";
-import { Download, Mail, Pencil } from "lucide-react";
-import Link from "next/link";
 
 const statusMap = {
   DRAFT: { label: "Utkast", variant: "secondary" as const },
@@ -81,17 +79,24 @@ export default async function InvoiceDetailPage({
       </div>
 
       {isEditable ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Rediger faktura</CardTitle>
-            <CardDescription>
-              Oppdater fakturaen. Fakturaen er i utkast-modus og kan redigeres.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InvoiceForm invoice={invoice} customers={customers} />
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Rediger faktura</CardTitle>
+              <CardDescription>
+                Oppdater fakturaen. Fakturaen er i utkast-modus og kan redigeres.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InvoiceForm invoice={invoice} customers={customers} />
+            </CardContent>
+          </Card>
+          <InvoiceActions
+            invoiceId={invoice.id}
+            status={invoice.status}
+            customerEmail={invoice.customer.email}
+          />
+        </>
       ) : (
         <>
           <Card>
@@ -254,19 +259,11 @@ export default async function InvoiceDetailPage({
             </Card>
           )}
 
-          <div className="flex gap-2">
-            <Button variant="outline" disabled>
-              <Download className="h-4 w-4 mr-2" />
-              Last ned PDF
-            </Button>
-            <Button variant="outline" disabled>
-              <Mail className="h-4 w-4 mr-2" />
-              Send på e-post
-            </Button>
-            <Button variant="outline" disabled>
-              Registrer betaling
-            </Button>
-          </div>
+          <InvoiceActions
+            invoiceId={invoice.id}
+            status={invoice.status}
+            customerEmail={invoice.customer.email}
+          />
         </>
       )}
     </div>

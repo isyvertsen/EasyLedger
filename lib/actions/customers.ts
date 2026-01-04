@@ -1,23 +1,11 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { getUserId } from "./user";
 import { prisma } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { customerSchema } from "~/lib/validations/customer";
 import { z } from "zod";
-
-async function getUserId() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) throw new Error("Ikke autentisert");
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-
-  if (!user) throw new Error("Bruker ikke funnet");
-  return user.id;
-}
 
 export async function getCustomers() {
   const userId = await getUserId();

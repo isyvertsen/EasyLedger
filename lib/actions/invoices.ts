@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { invoiceSchema, paymentSchema } from "~/lib/validations/invoice";
@@ -8,19 +7,7 @@ import { z } from "zod";
 import { generateInvoicePDFBuffer } from "~/lib/pdf-utils";
 import { sendInvoiceEmail } from "~/lib/email";
 import { getSettings } from "./settings";
-
-async function getUserId() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) throw new Error("Ikke autentisert");
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-
-  if (!user) throw new Error("Bruker ikke funnet");
-  return user.id;
-}
+import { getUserId } from "./user";
 
 export async function getInvoices() {
   const userId = await getUserId();
