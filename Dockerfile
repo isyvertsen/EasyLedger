@@ -44,21 +44,15 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
-# Standalone mode requires specific file structure
-COPY --from=builder /app/.next/standalone ./
+# Copy all necessary files from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/scripts ./scripts
-
-# Copy ALL node_modules for Prisma and dependencies
-# This includes Prisma Client, pg adapter, dotenv, etc.
-COPY --from=builder /app/node_modules ./node_modules
-
-# CRITICAL: Copy static assets to same level as server.js
-# Next.js standalone mode expects these at the same directory level
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/static ./.next/static
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
