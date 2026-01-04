@@ -49,11 +49,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/package*.json ./
 
-# Install production dependencies and Prisma CLI
-RUN npm ci --omit=dev && npx prisma generate
+# Copy ALL node_modules for Prisma and dependencies
+# This includes Prisma Client, pg adapter, dotenv, etc.
+COPY --from=builder /app/node_modules ./node_modules
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
