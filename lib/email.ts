@@ -1,6 +1,9 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Only initialize Resend if API key is configured
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export async function sendInvoiceEmail({
   to,
@@ -21,6 +24,10 @@ export async function sendInvoiceEmail({
   fromEmail: string;
   companyName: string;
 }) {
+  if (!resend) {
+    throw new Error("Resend API key is not configured. Please add RESEND_API_KEY to .env.local");
+  }
+
   return resend.emails.send({
     from: `${companyName} <${fromEmail}>`,
     to,

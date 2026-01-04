@@ -5,8 +5,7 @@ import { prisma } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { invoiceSchema, paymentSchema } from "~/lib/validations/invoice";
 import { z } from "zod";
-import { pdf } from "@react-pdf/renderer";
-import { InvoicePDF } from "~/components/pdf/invoice-pdf";
+import { generateInvoicePDFBuffer } from "~/lib/pdf-utils";
 import { sendInvoiceEmail } from "~/lib/email";
 import { getSettings } from "./settings";
 
@@ -143,12 +142,7 @@ export async function generateInvoicePDF(id: string) {
 
   if (!invoice) throw new Error("Faktura ikke funnet");
 
-  const pdfDoc = <InvoicePDF invoice={invoice} settings={settings} />;
-  const asPdf = pdf(pdfDoc);
-  const blob = await asPdf.toBlob();
-  const buffer = Buffer.from(await blob.arrayBuffer());
-
-  return buffer;
+  return await generateInvoicePDFBuffer(invoice, settings);
 }
 
 export async function sendInvoice(id: string) {
