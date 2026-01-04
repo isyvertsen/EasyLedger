@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  image     String?
+
+  settings   Settings?
+  customers  Customer[]
+  suppliers  Supplier[]
+  categories Category[]
+  invoices   Invoice[]
+  expenses   Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyName        String?
+  orgNumber          String?
+  address            String?
+  postalCode         String?
+  city               String?
+  logo               String?
+  bankAccount        String?
+  vatRate            Float   @default(25)
+  invoicePrefix      String  @default("FAK")
+  invoiceNextNumber  Int     @default(1000)
+  emailFrom          String?
+  paymentDueDays     Int     @default(14)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name       String
+  orgNumber  String?
+  email      String?
+  address    String?
+  postalCode String?
+  city       String?
+  phone      String?
+
+  invoices   Invoice[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Supplier {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name       String
+  orgNumber  String?
+  email      String?
+  address    String?
+  postalCode String?
+  city       String?
+  phone      String?
+
+  expenses   Expense[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Category {
+  id       String       @id @default(cuid())
+  userId   String
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name     String
+  type     CategoryType
+
+  expenses Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+
+  invoiceNumber String
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime
+  status        InvoiceStatus @default(DRAFT)
+  notes         String?
+
+  lines         InvoiceLine[]
+  payments      Payment[]
+
+  sentAt        DateTime?
+  sentTo        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, invoiceNumber])
+  @@index([userId])
+  @@index([customerId])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Float
+  unitPrice   Float
+  vatRate     Float   @default(25)
+  sortOrder   Int     @default(0)
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  amount    Float
+  date      DateTime @default(now())
+  note      String?
+
+  createdAt DateTime @default(now())
+}
+
+model Expense {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supplierId  String?
+  supplier    Supplier?     @relation(fields: [supplierId], references: [id])
+  categoryId  String?
+  category    Category?     @relation(fields: [categoryId], references: [id])
+
+  description String
+  amount      Float
+  vatAmount   Float?
+  date        DateTime
+  status      ExpenseStatus @default(REGISTERED)
+
+  attachments Attachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([supplierId])
+  @@index([categoryId])
+}
+
+enum ExpenseStatus {
+  REGISTERED
+  PAID
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  expenseId String
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  filename  String
+  url       String
+  mimeType  String?
+  size      Int?
+
+  createdAt DateTime @default(now())
+}
