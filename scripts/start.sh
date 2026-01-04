@@ -16,5 +16,5 @@ echo "🌐 Starting Next.js server on 0.0.0.0:3000..."
 export PORT=3000
 export HOSTNAME="0.0.0.0"
 
-# Run standard Next.js production server
-exec npm start
+# Run Next.js production server directly (avoid loop with npm start)
+exec node_modules/.bin/next start
