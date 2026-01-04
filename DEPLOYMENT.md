@@ -5,11 +5,20 @@ Denne guiden viser hvordan du deployer systemet til produksjon.
 ## Oversikt
 
 Systemet består av:
-- **Frontend/Backend:** Next.js (deployes til Vercel/Railway/Render)
-- **Database:** PostgreSQL (Neon/Supabase/Railway)
+- **Frontend/Backend:** Next.js (deployes til Coolify/Vercel/Railway/Render)
+- **Database:** PostgreSQL (Neon/Supabase/Railway/Coolify)
 - **Authentication:** Clerk (allerede satt opp)
 - **Email:** Resend (allerede satt opp)
 - **AI:** OpenAI (allerede satt opp)
+
+## 🎯 Automatic Migrations Setup
+
+Systemet kjører **automatisk** database migrations ved oppstart via `scripts/start.sh`:
+1. Genererer Prisma client (`postinstall` script)
+2. Kjører migrations (`prisma migrate deploy`)
+3. Starter Next.js server
+
+Dette betyr at du **ikke trenger tilgang til poden** for å kjøre migrations - alt skjer automatisk!
 
 ## VIKTIG: Database Oppsett
 
@@ -168,9 +177,114 @@ git push origin main
    - Gå til "Variables" tab
    - Legg til Clerk, Resend, OpenAI keys
 
-5. **Kjør Migrations**
-   - Klikk på service → "Terminal"
-   - Kjør: `npm run db:migrate`
+5. **Migrations kjører automatisk**
+   - Railway vil kjøre migrations automatisk ved oppstart via `scripts/start.sh`
+   - Ingen manuell handling nødvendig!
+
+## Deployment til Coolify (Self-Hosted)
+
+Coolify er perfekt for self-hosted deployment på egen server.
+
+### 1. **Opprett PostgreSQL Database i Coolify**
+   - I Coolify dashboard: Klikk "New Resource" → "Database" → "PostgreSQL"
+   - Velg versjon (16.x anbefales)
+   - Noter database credentials (eller bruk generated connection string)
+
+### 2. **Opprett Application**
+   - Klikk "New Resource" → "Application"
+   - Velg "Public Repository" eller "Private Repository" (koble GitHub)
+   - Repository URL: `https://github.com/username/easyledger`
+   - Branch: `main`
+
+### 3. **Konfigurer Build Settings**
+   - **Build Pack:** Nixpacks (auto-detektert for Next.js)
+   - **Port:** 3000 (Next.js default)
+   - **Install Command:** `npm install`
+   - **Build Command:** `npm run build`
+   - **Start Command:** `npm start` (dette vil kjøre `scripts/start.sh`)
+
+### 4. **Sett Environment Variables**
+   I Application → Environment Variables tab:
+
+   ```env
+   # Database (fra Coolify PostgreSQL resource)
+   DATABASE_URL=postgresql://user:password@postgres:5432/easyledger?sslmode=require
+
+   # Clerk (production keys)
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+   CLERK_SECRET_KEY=sk_live_...
+   CLERK_WEBHOOK_SECRET=whsec_...
+
+   # Resend
+   RESEND_API_KEY=re_...
+
+   # OpenAI
+   OPENAI_API_KEY=sk-proj-...
+
+   # Optional: GitHub Feedback
+   GITHUB_TOKEN=ghp_...
+   GITHUB_REPO=username/repo
+   FEEDBACK_AI_PROVIDER=openai
+   FEEDBACK_AI_API_KEY=sk-proj-...
+   FEEDBACK_AI_MODEL=gpt-4o
+
+   # Node environment
+   NODE_ENV=production
+   ```
+
+### 5. **Deploy**
+   - Klikk "Deploy"
+   - Coolify vil:
+     1. Clone repository
+     2. Kjøre `npm install` (postinstall genererer Prisma client)
+     3. Kjøre `npm run build`
+     4. Kjøre `npm start` som trigger `scripts/start.sh`
+     5. `start.sh` kjører migrations automatisk
+     6. Starter Next.js server
+
+### 6. **Sett opp Domain**
+   - I Application → Domains tab
+   - Legg til ditt domene (f.eks. `easyledger.yourdomain.com`)
+   - Coolify håndterer automatisk SSL via Let's Encrypt
+
+### 7. **Oppdater Clerk Webhook URL**
+   - I Clerk Dashboard → Webhooks
+   - Sett endpoint til: `https://easyledger.yourdomain.com/api/webhooks/clerk`
+   - Kopier ny CLERK_WEBHOOK_SECRET hvis nødvendig
+
+### Coolify Tips
+
+**Auto-deploy ved Git Push:**
+- Gå til Application → Webhooks
+- Aktiver "Auto deploy on push"
+- Hver gang du pusher til `main` branch, deployer Coolify automatisk
+
+**Database Backup:**
+- Coolify PostgreSQL har innebygd backup
+- Gå til Database resource → Backups
+- Sett opp automatisk backup schedule (anbefalt: daglig)
+
+**Logs:**
+- Application → Logs tab for application logs
+- Database → Logs tab for database logs
+
+**Resource Usage:**
+- Monitor CPU/RAM i Application → Metrics tab
+
+**Container Restart:**
+- Hvis noe går galt: Application → Actions → Restart
+
+### Coolify Database Connection
+
+Hvis database og app er i samme Coolify prosjekt, bruk intern hostname:
+```env
+DATABASE_URL=postgresql://user:password@postgres:5432/easyledger
+```
+
+Hvis ekstern database (Neon/Supabase), bruk full connection string:
+```env
+DATABASE_URL=postgresql://user:password@external-host.com:5432/database?sslmode=require
+```
 
 ## Post-Deployment Sjekkliste
 
