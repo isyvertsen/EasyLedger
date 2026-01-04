@@ -5,10 +5,14 @@
   "scripts": {
     "dev": "nodemon",
     "dev:next": "next dev -p 4001",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "create-test-user": "tsx scripts/create-test-user.ts"
+    "create-test-user": "tsx scripts/create-test-user.ts",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@clerk/localizations": "^3.32.1",
