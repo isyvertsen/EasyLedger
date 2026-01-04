@@ -20,9 +20,10 @@ const statusMap = {
 export default async function EditExpensePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const expense = await getExpense(params.id);
+  const { id } = await params;
+  const expense = await getExpense(id);
 
   if (!expense) {
     notFound();

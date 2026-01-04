@@ -33,9 +33,10 @@ const statusMap = {
 export default async function InvoiceDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const invoice = await getInvoice(params.id);
+  const { id } = await params;
+  const invoice = await getInvoice(id);
 
   if (!invoice) {
     notFound();
