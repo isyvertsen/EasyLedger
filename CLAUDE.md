@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Norwegian invoice and accounting system (Faktura- og Regnskapssystem) built with:
 - **Framework**: Next.js 15+ with App Router
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk (Google OAuth)
+- **Authentication**: NextAuth.js v5 (Google OAuth)
 - **UI**: shadcn/ui components with Tailwind CSS
 - **Email**: Resend
 - **PDF Generation**: @react-pdf/renderer
@@ -46,26 +46,20 @@ npm start
 ## Architecture
 
 ### Authentication Flow
-- Clerk middleware protects all routes except `/sign-in`, `/sign-up`, and `/api/webhooks`
-- Clerk webhook syncs user data to PostgreSQL on user creation/update/deletion
+- NextAuth.js middleware protects all routes except `/sign-in` and `/api/auth`
+- JWT-based sessions for Edge Runtime compatibility
+- User data synced to PostgreSQL on sign-in via NextAuth events
 - All database operations MUST filter by `userId` for multi-tenant data isolation
-- Get user in Server Components/Actions: `const { userId } = await auth()`
+- Get user in Server Components/Actions: `const session = await auth(); const userId = session?.user?.id;`
 
 ### Data Access Pattern
 **CRITICAL**: All queries must use the `getUserId()` helper to ensure multi-tenant isolation:
 
 ```typescript
 async function getUserId() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) throw new Error("Ikke autentisert");
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-
-  if (!user) throw new Error("Bruker ikke funnet");
-  return user.id;
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Ikke autentisert");
+  return session.user.id;
 }
 ```
 
@@ -145,18 +139,30 @@ async function getUserId() {
 
 ## Environment Variables
 
-Required in `.env.local`:
+Required in `.env.local` (development):
 ```env
 # Database
 DATABASE_URL="postgresql://..."
 
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-CLERK_WEBHOOK_SECRET=whsec_...
+# NextAuth v5 Authentication
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=your-generated-secret-here
+AUTH_URL=http://localhost:3000
+
+# Google OAuth (required)
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-your-google-client-secret
+
+# Optional: Azure AD (Entra ID)
+# AZURE_AD_CLIENT_ID=your-azure-client-id
+# AZURE_AD_CLIENT_SECRET=your-azure-client-secret
+# AZURE_AD_TENANT_ID=your-azure-tenant-id
 
 # Email
 RESEND_API_KEY=re_...
+
+# OpenAI (for invoice recognition)
+OPENAI_API_KEY=sk-proj-...
 
 # Feedback System (optional - see Feedback System section)
 GITHUB_TOKEN=ghp_xxxxx
@@ -164,6 +170,16 @@ GITHUB_REPO=username/repo-name
 FEEDBACK_AI_PROVIDER=openai
 FEEDBACK_AI_API_KEY=sk_xxxxx
 FEEDBACK_AI_MODEL=gpt-4o
+```
+
+**Production Environment Variables:**
+```env
+# CRITICAL: Set these in production
+AUTH_SECRET=your-production-secret  # Must be different from dev
+AUTH_URL=https://yourdomain.com     # Your production domain
+DATABASE_URL="postgresql://..."
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 ```
 
 ## Important Rules
@@ -177,24 +193,22 @@ FEEDBACK_AI_MODEL=gpt-4o
 7. **VAT Calculations**: Support per-line VAT rates (default 25%)
 8. **Testing**: According to user instructions, tests must involve the database and servers must be manually started first
 
-## Clerk Configuration
+## NextAuth Configuration
 
-Middleware pattern:
+Middleware pattern in `middleware.ts`:
 ```typescript
-const isPublicRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks(.*)",
-]);
+export { auth as middleware } from "~/lib/auth";
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-});
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
 ```
 
-Layout must wrap with `<ClerkProvider localization={nbNO}>` for Norwegian UI.
+Authentication configuration split between:
+- `auth.config.ts`: Edge-compatible config (providers, callbacks) used by middleware
+- `lib/auth.ts`: Full config with Prisma adapter for database operations
+
+**Important**: NextAuth v5 uses `AUTH_*` environment variables (not `NEXTAUTH_*`)
 
 ## shadcn/ui Components
 
