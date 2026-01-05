@@ -1,47 +1,25 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { prisma } from "~/lib/db";
+import { auth } from "~/lib/auth";
 
 /**
- * Gets the internal user ID from database.
- * Auto-creates user if they don't exist (fallback for missing webhooks).
+ * Gets the authenticated user ID from NextAuth session.
+ * Throws error if user is not authenticated.
  */
-export async function getUserId() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) throw new Error("Ikke autentisert");
+export async function getUserId(): Promise<string> {
+  const session = await auth();
 
-  // Try to find existing user
-  let user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-
-  // If user doesn't exist, create them (fallback for webhook issues)
-  if (!user) {
-    const clerkUser = await currentUser();
-    if (!clerkUser) throw new Error("Kunne ikke hente brukerdata fra Clerk");
-
-    const email = clerkUser.emailAddresses[0]?.emailAddress;
-    const name = [clerkUser.firstName, clerkUser.lastName]
-      .filter(Boolean)
-      .join(" ");
-
-    user = await prisma.user.create({
-      data: {
-        clerkId,
-        email: email!,
-        name: name || "Ukjent",
-        image: clerkUser.imageUrl,
-        settings: {
-          create: {},
-        },
-      },
-      select: { id: true },
-    });
-
-    console.log("✅ Auto-created user:", email);
+  if (!session?.user?.id) {
+    throw new Error("Ikke autentisert");
   }
 
-  return user.id;
+  return session.user.id;
+}
+
+/**
+ * Gets the full user session.
+ * Returns null if not authenticated.
+ */
+export async function getUserSession() {
+  return await auth();
 }
