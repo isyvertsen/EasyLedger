@@ -13,7 +13,7 @@ const prisma = new PrismaClient({ adapter });
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any, // Type assertion to fix version conflict between next-auth and @auth/prisma-adapter
   session: {
     strategy: "jwt", // Must use JWT for Edge Runtime middleware compatibility
     maxAge: 30 * 24 * 60 * 60, // 30 dager
@@ -42,6 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   events: {
     async createUser({ user }) {
       // Auto-opprett Settings når ny bruker opprettes
+      if (!user.id) return;
       await prisma.settings.create({
         data: { userId: user.id },
       });
