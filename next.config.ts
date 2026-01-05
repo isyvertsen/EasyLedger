@@ -2,9 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Standard production build without standalone complexity
-  experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "pg"],
-  },
+  serverExternalPackages: ["@prisma/client", "pg"],
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Ignore pg-native module (optional native binding for pg)
