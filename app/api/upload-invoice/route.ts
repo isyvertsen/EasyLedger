@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "~/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { extractInvoiceData, extractInvoiceDataFromText } from "~/lib/openai";
 import { extractTextFromPDF } from "~/lib/pdf-extractor";
@@ -6,8 +6,8 @@ import { extractTextFromPDF } from "~/lib/pdf-extractor";
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

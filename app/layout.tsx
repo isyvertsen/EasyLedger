@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
-import { nbNO } from "@clerk/localizations";
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "~/components/ui/toaster";
 import "./globals.css";
 
@@ -26,15 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider localization={nbNO}>
-      <html lang="nb">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+    <html lang="nb">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SessionProvider>
           {children}
-          <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+        </SessionProvider>
+        <Toaster />
+      </body>
+    </html>
   );
 }
